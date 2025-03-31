@@ -26,14 +26,6 @@ function [u_mpc, exitflag] = interiorPoint(H, f, A, b, A_i, b_i, n_u)
 
 exitflag = 0;
 
-% function for convergence (check infinity norm on complementary slackness)
-tol = 1.e-12;
-is_converged = @(Sz, mu, tol) (abs(norm(Sz, inf)-mu) < tol);
-
-% anonymous functions for conveniently evaluating constraints
-c_e = @(x) A*x - b;
-c_i = @(x) A_i*x - b_i;
-
 % initial guesses for Lagrange multipliers (y, z) and slacks (s)
 alpha = 1.e-3; % step size
 y = ones(size(A, 1), 1);
@@ -49,17 +41,27 @@ f_init = [ones(ns, 1); zeros(nx, 1)];
 A_init = [-eye(ns) zeros(ns,nx);
           eye(ns) A_i];
 b_init = [-1e-1.*ones(ns,1); b_i]; 
-init_guess = linprog(f_init,A_init,b_init,[],[],[],[]);
+options = optimoptions('linprog', 'Display', 'off');
+init_guess = linprog(f_init,A_init,b_init,[],[],[],[],options);
 s = init_guess(1:ns);
 S = diag(s);
 u = init_guess(ns+1:end);
+
+% anonymous functions
+tol = 1.e-12;
+c_e = @(x) A*x - b;
+c_i = @(x) A_i*x - b_i;
+E = @(u, s, z) max([norm(H*u-(A_i'*z)+f, inf) ...
+    norm(S*z - mu.*ones(size(S,1),1), inf) ...
+    norm(c_i(u) + s,inf)]);
+is_converged = @(u, s, z, mu, tol) abs(E(u, s, z) - mu) < tol;
 
 % KKT matrices based on existence of equality/inequality constraints
 H_kkt = [];
 grad_kkt = [];
 current_optimum = [];
 
-while mu > 0.1
+while mu > 1
     H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
         zeros(size(Z,1), size(H,2)) Z S;
         A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1))];
@@ -67,7 +69,7 @@ while mu > 0.1
     current_optimum = [u; s; z];
     inv_H_kkt = inv(H_kkt);
     U = [zeros(size(H,1),size(Z,1)); eye(size(Z,1)); zeros(size(A_i, 1), size(Z,1))];
-    while (~is_converged(S*z, mu, tol))
+    while (~is_converged(u, s, z, mu, tol))
         p = inv_H_kkt*grad_kkt;
         current_optimum = current_optimum - alpha.*p;
         lu = length(u); ls = length(s); lz = length(z);
