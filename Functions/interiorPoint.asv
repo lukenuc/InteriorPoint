@@ -48,7 +48,7 @@ nx = size(H,1); ns = length(b_i);
 f_init = [ones(ns, 1); zeros(nx, 1)];
 A_init = [-eye(ns) zeros(ns,nx);
           eye(ns) A_i];
-b_init = [-1e-1.*ones(ns,1); b_i]; 
+b_init = [1e-2.*ones(ns,1); b_i]; 
 init_guess = linprog(f_init,A_init,b_init,[],[],[],[]);
 s = init_guess(1:ns);
 S = diag(s);
@@ -82,7 +82,7 @@ while mu > 0.1
         inv_H_kkt = inv_H_kkt*(eye(size(inv_H_kkt,1)) - U*((eye(size(Z,1)) + V*inv_H_kkt*U)\(V*inv_H_kkt)));
         grad_kkt = [H*u-(A_i'*z)+f; S*z - mu.*ones(size(S,1),1); c_i(u) + s];
     end
-    mu = sigma*mu % tighten mu
+    mu = sigma*mu; % tighten mu
 end
 u_mpc = u(1:n_u);
 end

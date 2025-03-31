@@ -2,7 +2,6 @@
 clear; close all; clc
 
 x = zeros(2,1); % state vector
-u = 0; % control input
 Ts = 0.1; % sampling period [s]
 Tsim = 10; % simulation period [s]
 t = 0:Ts:Tsim;
