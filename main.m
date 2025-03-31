@@ -1,15 +1,5 @@
-% Week 1 (Feb 4 - Feb 10): Solvers for MPC
-%
-% Objective: Write a custom interior-point method solver for MPC QP
-% problems
-% Tasks:
-% Consult sources and start with a small MPC problem, then grow
-% Deliverable: Demonstrate tracking performance via interior point solver.
 
-clear all
-close all
-clc
-
+clear; close all; clc
 
 x = zeros(2,1); % state vector
 u = 0; % control input
@@ -18,22 +8,22 @@ Tsim = 10; % simulation period [s]
 t = 0:Ts:Tsim;
 
 b = 0.05; % drag coefficient
-A = [0 1; 0 -b]; % Continuous time state-space matrices for double integrator
+A = [0 1; 0 -b];
 B = [0; 1];
 C = eye(2);
 D = [0; 0];
 
-Ad = eye(2) + Ts.*A; % Discrete time dynamics derived via forward Euler integration
+% discrete time dynamics
+Ad = eye(2) + Ts.*A;
 Bd = Ts.*B;
 
 %% MPC setup
 
 nx = 2; % number of states
 nu = 1; % number of control inputs
-p = 10; % size of prediction horizon
+p = 5; % size of prediction horizon
 x0_t = [0; 0]; % initial state
 
-% x0_t = repmat(x0, p, 1); 
 xmin = repmat([-100; -30], p, 1);
 xmax = repmat([100; 22], p, 1);
 umin = repmat([-10], p, 1);
@@ -60,29 +50,21 @@ for i = 1:p
     end
 end
 
-% computing matrices for constraints and objective function
-x_ref = [10; 0]; % desired location
-
+x_ref = [10; 0];
 A_i = [M_ab; -M_ab; eye(nu*p); -eye(nu*p)];
-b_i = [xmax-M_ak*(x0_t-x_ref); -xmin+M_ak*(x0_t-x_ref); umax; -umin];
 H = (1/2).*((M_ab')*My*M_ab + Mu); 
-% f = (M_ab')*My*M_ak*(x0_t-x_ref); 
- 
-%% MPC controller using MPC toolbox
 
-% Reference Bezier curve
+% Reference Bezier curve for position tracking
 t_bez = linspace(0, 1, Tsim/Ts);
 t_bez = [t_bez repmat(t_bez(end), 1, p)]; % extend ending for prediction horizon
 bezier_ref = kron((1-t_bez).^3, 0) + kron(3*(1-t_bez).^2.*t_bez, -5) + kron(3*(1-t_bez).*t_bez.^2, 105) + kron(t_bez.^3, 100); 
 
 for i = 1:length(t)-1
     progressBar(floor(100*i/(length(t)-1)))
-    % f = (M_ab)'*My*M_ak*(x0_t-x_ref);
     pos_ref = bezier_ref(i:i+p-1)'; 
     y_ref = zeros(nx*p, 1); 
     y_ref(1:2:end) = pos_ref; 
     f = (M_ab')*My*(M_ak*x0_t - y_ref);
-    % b_i = [xmax-M_ak*(x0_t-x_ref); -xmin+M_ak*(x0_t-x_ref); umax; -umin];
     b_i = [xmax-M_ak*x0_t+y_ref; -xmin+M_ak*x0_t-y_ref; umax; -umin];
     [u,~] = interiorPoint(H,f,[],[],A_i,b_i,nu);
     x0_t = Ad*x0_t + Bd*u; % update state with optimal control
@@ -91,32 +73,9 @@ for i = 1:length(t)-1
     u_mpc(i) = u; 
 end
 
-%%
-% % plot results 
-% figure('Position', [100 100 1200 400]); 
-% subplot(1, 3, 1)
-% stairs(t(1:end-1), u_mpc, 'LineWidth', 2); 
-% title('Vehicle Control: MPC Input'); 
-% xlabel('Time [s]')
-% ylabel('Applied Acceleration [m/s/s]')
-% grid on 
-% grid minor
-% subplot(1, 3, 2)
-% plot(t(1:end-1), mpc_states(1,1:end-1), 'LineWidth', 2, 'Color', 'g'); 
-% title('Vehicle Control: Position'); 
-% xlabel('Time [s]')
-% ylabel('Position [m]')
-% grid on 
-% grid minor
-% subplot(1, 3, 3)
-% plot(t(1:end-1), mpc_states(2,1:end-1), 'LineWidth', 2, 'Color', 'r'); 
-% title('Vehicle Control: Velocity'); 
-% xlabel('Time [s]')
-% ylabel('Velocity [m/s]')
-% grid on 
-% grid minor
 
-% plot results 
+%% plot results 
+
 figure('Position', [100 100 1200 400]); 
 subplot(1, 3, 1)
 stairs(t(1:end-1), u_mpc, 'LineWidth', 2); 
