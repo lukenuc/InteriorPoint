@@ -82,10 +82,10 @@ while mu > 0.1
         p_u = p(1:lu);
         p_s = p(lu+1:lu+ls);
         p_z = p(lu+ls+1:lu+ls+lz);
-        % alpha_s = LineSearch(s, p_s, tau);
-        % alpha_z = LineSearch(z, p_z, tau);
-        alpha_s = 1e-4;
-        alpha_z = 1e-4;
+        alpha_s = LineSearch(s, p_s, tau);
+        alpha_z = LineSearch(z, p_z, tau);
+        % alpha_s = 1e-4;
+        % alpha_z = 1e-4;
         u = u + alpha_s*p_u;
         s = s + alpha_s*p_s;
         z = z + alpha_z*p_z;
