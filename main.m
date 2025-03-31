@@ -25,8 +25,8 @@ x0_t = [0; 0]; % initial state
 
 xmin = repmat([-100; -30], p, 1);
 xmax = repmat([100; 22], p, 1);
-umin = repmat([-10], p, 1);
-umax = repmat([10], p, 1);
+umin = repmat([-20], p, 1);
+umax = repmat([20], p, 1);
 M_ab = zeros(nx*p, nu*p);
 M_ak = zeros(nx*p, nx);
 qy_weight = [50; 1];
