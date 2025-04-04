@@ -20,7 +20,7 @@ Bd = Ts.*B;
 
 nx = 2; % number of states
 nu = 1; % number of control inputs
-p = 5; % size of prediction horizon
+p = 10; % size of prediction horizon
 x0_t = [0; 0]; % initial state
 
 xmin = repmat([-100; -30], p, 1);
@@ -64,7 +64,7 @@ for i = 1:length(t)-1
     y_ref(1:2:end) = pos_ref; 
     f = (M_ab')*My*(M_ak*x0_t - y_ref);
     b_i = [xmax-M_ak*x0_t+y_ref; -xmin+M_ak*x0_t-y_ref; umax; -umin];
-    [u,~] = interiorPoint(H,f,[],[],A_i,b_i,nu);
+    [u,~] = interiorPoint(H,f,[],[],A_i,b_i,nu,p);
     x0_t = Ad*x0_t + Bd*u; % update state with optimal control
     
     mpc_states(:, i+1) = x0_t; 

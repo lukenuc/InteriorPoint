@@ -1,0 +1,9 @@
+function [Minv] = schurInverse(M, p, q)
+
+A = M(1:p,1:p); B = M(1:p,p+1:end);
+C = M(p+1:end,1:p); D = M(p+1:end,p+1:end);
+
+Z = D(1:q, 1:q); S = Z(1:q, q+1:end); 
+disinv = 1 ./ diag(S); z
+end
+
