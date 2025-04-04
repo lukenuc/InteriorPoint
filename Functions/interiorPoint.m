@@ -60,13 +60,13 @@ E = @(u, s, z) max([norm(H*u-(A_i'*z)+f, inf) ...
 H_kkt = [];
 grad_kkt = [];
 current_optimum = [];
+x0 = [init_guess; z]; 
 
 while mu > 0.1
     H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
         zeros(size(Z,1), size(H,2)) Z S;
         A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1))];
     grad_kkt = [H*u-(A_i'*z)+f; S*z - mu.*ones(size(S,1),1); c_i(u) + s];
-    % U = [zeros(size(H,1),size(Z,1)); eye(size(Z,1)); zeros(size(A_i, 1), size(Z,1))];
     c_i = @(x) A_i*x - b_i;
     E = @(u, s, z) max([norm(H*u-(A_i'*z)+f, inf) ...
         norm(diag(s)*z - mu.*ones(length(s),1), inf) ...
@@ -77,20 +77,23 @@ while mu > 0.1
         E = @(u, s, z) max([norm(H*u-(A_i'*z)+f, inf) ...
             norm(diag(s)*z - mu.*ones(length(s),1), inf) ...
             norm(c_i(u) + s,inf)]);
-        p = -H_kkt\grad_kkt;
+        
+        % Improve this
+        % p = -H_kkt\grad_kkt;
+        MAXIT = 500; 
+        [U,c,~] = GaussElimPivoting(H_kkt,-grad_kkt);
+        [p,~] = backSubs(U,c);
+        x0 = p; 
+
         lu = length(u); ls = length(s); lz = length(z);
         p_u = p(1:lu);
         p_s = p(lu+1:lu+ls);
         p_z = p(lu+ls+1:lu+ls+lz);
         alpha_s = LineSearch(s, p_s, tau);
         alpha_z = LineSearch(z, p_z, tau);
-        % alpha_s = 1e-4;
-        % alpha_z = 1e-4;
         u = u + alpha_s*p_u;
         s = s + alpha_s*p_s;
         z = z + alpha_z*p_z;
-        % delta_S = diag(s) - S;
-        % delta_Z = diag(z) - Z;
         S = diag(s); Z = diag(z);
         % % update KKT Hessian inverse via Sherman-Woodbury formula
         H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';

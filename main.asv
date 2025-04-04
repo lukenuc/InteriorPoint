@@ -20,7 +20,7 @@ Bd = Ts.*B;
 
 nx = 2; % number of states
 nu = 1; % number of control inputs
-p = 5; % size of prediction horizon
+p = 10; % size of prediction horizon
 x0_t = [0; 0]; % initial state
 
 xmin = repmat([-100; -30], p, 1);
@@ -29,7 +29,7 @@ umin = repmat([-30], p, 1);
 umax = repmat([30], p, 1);
 M_ab = zeros(nx*p, nu*p);
 M_ak = zeros(nx*p, nx);
-qy_weight = [50; 1];
+qy_weight = [10; 1];
 qu_weight = 1;
 Qy = diag(qy_weight);
 Qu = diag(qu_weight);
@@ -49,6 +49,7 @@ for i = 1:p
     end
 end
 
+x_ref = [10; 0];
 A_i = [M_ab; -M_ab; eye(nu*p); -eye(nu*p)];
 H = (1/2).*((M_ab')*My*M_ab + Mu); 
 
