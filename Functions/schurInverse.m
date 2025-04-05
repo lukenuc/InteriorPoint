@@ -11,6 +11,7 @@ Dinv = [zeros(q) eye(q); diag(diag_sinv) diag(-diag_sinv.*diag_z)];
 MsD = A - B*Dinv*C; 
 MsDinv = inv(MsD);
 
-Minv = [MsDinv -MsDinv*B*Dinv; -Dinv*C*MsDinv Dinv+Dinv*C*MsDinv*B*Dinv];
+T = MsDinv*B*Dinv; U = Dinv*C;
+Minv = [MsDinv -T; -U*MsDinv Dinv+U*T];
 end
 
