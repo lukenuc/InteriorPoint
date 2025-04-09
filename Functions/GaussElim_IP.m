@@ -39,10 +39,24 @@ if n ~= size(b,1) || size(b,2) ~= 1
     return
 end
 
-for j = 1 : n-1
+for j = 1 : p+q
     % spy(abs(A) > tol)
-    if (j <= p) || (j >= p+q+1)
-        for i = j+1 : n
+    % if (j <= p) || (j >= p+q+1)
+    %     for i = j+1 : n
+    %         m = A(i,j)/A(j,j);
+    %         for k = j : n
+    %             A(i,k) = A(i,k) - m*A(j,k);
+    %         end
+    %         b(i) = b(i) - m*b(j);
+    %     end
+    % else
+    %     m = 1/A(j,j);
+    %     A(j+q,j) = 0;
+    %     A(j+q,j+q) = A(j+q,j+q) - m*A(j,j+q);
+    %     b(j+q) = b(j+q) - m*b(j);
+    % end
+    if (j <= p)
+        for i = j+1:p+q
             m = A(i,j)/A(j,j);
             for k = j : n
                 A(i,k) = A(i,k) - m*A(j,k);
@@ -50,10 +64,9 @@ for j = 1 : n-1
             b(i) = b(i) - m*b(j);
         end
     else
-        m = 1/A(j,j);
+        m = A(j+q,j); 
         A(j+q,j) = 0;
-        A(j+q,j+q) = A(j+q,j+q) - m*A(j,j+q);
-        b(j+q) = b(j+q) - m*b(j);
+        b(j+q) = b(j+q) - m; 
     end
 end
 

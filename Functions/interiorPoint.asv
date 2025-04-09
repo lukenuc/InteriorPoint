@@ -22,7 +22,7 @@
 %
 % =========================================================================
 
-function [u_mpc, exitflag] = interiorPoint(H, f, A, b, A_i, b_i, n_u)
+function [u_mpc, exitflag] = interiorPoint(H, f, A, b, A_i, b_i, n_u, N)
 
 exitflag = 0;
 
@@ -63,10 +63,14 @@ current_optimum = [];
 x0 = [init_guess; z]; 
 
 while mu > 0.1
+    % H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
+    %     zeros(size(Z,1), size(H,2)) Z S;
+    %     A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1))];
+    % grad_kkt = [H*u-(A_i'*z)+f; S*z - mu.*ones(size(S,1),1); c_i(u) + s];
     H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
-        zeros(size(Z,1), size(H,2)) Z S;
-        A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1))];
-    grad_kkt = [H*u-(A_i'*z)+f; S*z - mu.*ones(size(S,1),1); c_i(u) + s];
+            A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1));
+            zeros(size(Z,1), size(H,2)) Z S];
+    grad_kkt = [H*u-(A_i'*z)+f; c_i(u) + s; S*z - mu.*ones(size(S,1),1)];
     c_i = @(x) A_i*x - b_i;
     E = @(u, s, z) max([norm(H*u-(A_i'*z)+f, inf) ...
         norm(diag(s)*z - mu.*ones(length(s),1), inf) ...
@@ -79,12 +83,14 @@ while mu > 0.1
             norm(c_i(u) + s,inf)]);
         
         % Improve this
+        p = -H_kkt\grad_kkt;
+        
+        % Gaussian elimination + back-substitution
+        % [U,c,~] = GaussElim_IP(H_kkt,-grad_kkt,N,m);
+        % [p,~] = backSubs_IP(U,c,N,m);
+        % inv_H_kkt = schurInverse(H_kkt,N,m); 
+        % p = -1*(inv_H_kkt)*grad_kkt;
         % p = -H_kkt\grad_kkt;
-        MAXIT = 500; 
-        % [U,c,~] = GaussElimPivoting(H_kkt,-grad_kkt);
-        % [U,c,~] = GaussElimPivot_IP(H_kkt,-grad_kkt);
-        % [p,~] = backSubs(U,c);
-        inv_H_kkt = schurInverse(H_kkt,)
         x0 = p; 
 
         lu = length(u); ls = length(s); lz = length(z);
@@ -98,10 +104,14 @@ while mu > 0.1
         z = z + alpha_z*p_z;
         S = diag(s); Z = diag(z);
         % % update KKT Hessian inverse via Sherman-Woodbury formula
+        % H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
+        %     zeros(size(Z,1), size(H,2)) Z S;
+        %     A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1))];
+        % grad_kkt = [H*u-(A_i'*z)+f; S*z - mu.*ones(size(S,1),1); c_i(u) + s];
         H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
-            zeros(size(Z,1), size(H,2)) Z S;
-            A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1))];
-        grad_kkt = [H*u-(A_i'*z)+f; S*z - mu.*ones(size(S,1),1); c_i(u) + s];
+            A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1));
+            zeros(size(Z,1), size(H,2)) Z S];
+        grad_kkt = [H*u-(A_i'*z)+f; c_i(u) + s; S*z - mu.*ones(size(S,1),1)];
     end
     mu = sigma*mu; % tighten mu
 end

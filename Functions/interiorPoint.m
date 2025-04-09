@@ -84,13 +84,12 @@ while mu > 0.1
         
         % Improve this
         p = -H_kkt\grad_kkt;
-
-        % MAXIT = 500; 
+        
+        % Gaussian elimination + back-substitution
         % [U,c,~] = GaussElimPivoting(H_kkt,-grad_kkt);
         % [U,c,~] = GaussElimPivot_IP(H_kkt,-grad_kkt);
-        % [U,c,~] = GaussElim_IP(H_kkt,-grad_kkt,N,m);
-        % [p,~] = backSubs(U,c); 
-        % [p,~] = backSubs(U,c);
+        [U,c,~] = GaussElim_IP(H_kkt,-grad_kkt,N,m);
+        [p,~] = backSubs_IP(U,c,N,m);
         % inv_H_kkt = schurInverse(H_kkt,N,m); 
         % p = -1*(inv_H_kkt)*grad_kkt;
         % p = -H_kkt\grad_kkt;
