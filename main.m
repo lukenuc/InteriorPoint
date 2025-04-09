@@ -20,7 +20,7 @@ Bd = Ts.*B;
 
 nx = 2; % number of states
 nu = 1; % number of control inputs
-p = 10; % size of prediction horizon
+p = 5; % size of prediction horizon
 x0_t = [0; 0]; % initial state
 
 xmin = repmat([-100; -30], p, 1);
