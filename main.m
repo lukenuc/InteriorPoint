@@ -1,5 +1,5 @@
 
-clear; close all; clc
+clear all; close all; clc
 
 x = zeros(2,1); % state vector
 Ts = 0.1; % sampling period [s]
@@ -57,6 +57,8 @@ t_bez = linspace(0, 1, Tsim/Ts);
 t_bez = [t_bez repmat(t_bez(end), 1, p)]; % extend ending for prediction horizon
 bezier_ref = kron((1-t_bez).^3, 0) + kron(3*(1-t_bez).^2.*t_bez, -5) + kron(3*(1-t_bez).*t_bez.^2, 105) + kron(t_bez.^3, 100); 
 
+avg_time = 0; 
+
 for i = 1:length(t)-1
     progressBar(floor(100*i/(length(t)-1)))
     pos_ref = bezier_ref(i:i+p-1)'; 
@@ -64,7 +66,9 @@ for i = 1:length(t)-1
     y_ref(1:2:end) = pos_ref; 
     f = (M_ab')*My*(M_ak*x0_t - y_ref);
     b_i = [xmax-M_ak*x0_t+y_ref; -xmin+M_ak*x0_t-y_ref; umax; -umin];
+    tic
     [u,~] = interiorPoint(H,f,[],[],A_i,b_i,nu,p);
+    avg_time = avg_time + toc/length(t); 
     x0_t = Ad*x0_t + Bd*u; % update state with optimal control
     
     mpc_states(:, i+1) = x0_t; 

@@ -15,7 +15,7 @@
 %
 function [x,k,exitflag] = SOR(A,b,x0,omega,TOL,MAXIT)
 
-x = x0;
+x = x0(:);
 n = length(b);
 
 for k = 1 : MAXIT
