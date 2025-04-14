@@ -83,11 +83,15 @@ while mu > 0.1
         norm(diag(s)*z - mu.*ones(length(s),1), inf) ...
         norm(c_i(u) + s,inf)]);
     while (E(u, s, z) > mu)
-        % p = inv_H_kkt*grad_kkt;
+
         c_i = @(x) A_i*x - b_i;
         E = @(u, s, z) max([norm(H*u-(A_i'*z)+f, inf) ...
             norm(diag(s)*z - mu.*ones(length(s),1), inf) ...
             norm(c_i(u) + s,inf)]);
+
+        [row, col, val] = find(H_kkt);
+        coo = sortrows([row col val], 1);
+        row = coo(:,1); col = coo(:,2); val = coo(:,3);
 
         % Improve this
         % p = -H_kkt\grad_kkt;
@@ -104,7 +108,7 @@ while mu > 0.1
         % inv_H_kkt = schurInverseNewton(H_kkt,N,m);
         % % inv_H_kkt = mtx_inv_newton(H_kkt,1.e-9,100,H_kkt'/(norm(H_kkt,1)*norm(H_kkt,inf)));
         % p = -inv_H_kkt*grad_kkt;
-        p = -H_kkt\grad_kkt; 
+        % p = -H_kkt\grad_kkt;
 
         %% Iterative methods
         %
@@ -119,9 +123,10 @@ while mu > 0.1
         % U = -1.*triu(H_cond, 1);
         % H_SOR_cond = inv(D-w.*L)*((1-w).*D+w.*U);
 
-        w = 1;
+        w = 0.54;
         % [p,~,~] = SOR(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-5, 100);
-        % [p,~,~] = SOR_IP(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-5, 100, N, m);
+        [p,~,~] = SOR_IP(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-2, 100, N, m);
+        % [p,~,~] = SOR_COO(row, col, val, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-2, 100);
 
         lu = length(u); ls = length(s); lz = length(z);
         p_u = p(1:lu);
@@ -146,6 +151,7 @@ while mu > 0.1
         H_kkt = [H zeros(size(H,1), size(Z, 2)) A_i';
             A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1));
             zeros(size(Z,1), size(H,2)) Z S];
+
         grad_kkt = [H*u-(A_i'*z)+f; c_i(u) + s; S*z - mu.*ones(size(S,1),1)];
 
         %     H_kkt = [A_i eye(size(A_i, 1), size(Z, 2)) zeros(size(A_i,1), size(A_i,1));

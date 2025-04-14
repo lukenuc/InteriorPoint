@@ -1,0 +1,46 @@
+function [Minv] = schurWoodbury(M, p, q)
+
+persistent MsDinv_prev;
+persistent A; 
+persistent Ainv; 
+persistent B; 
+persistent C; 
+persistent CAB; 
+persistent prev_diag_s; 
+persistent prev_diag_z; 
+persistent MsAinv; 
+
+if ~isempty(A)
+    A = M(1:p,1:p); 
+    Ainv = inv(A); 
+    B = M(1:p,p+1:end);
+    C = M(p+1:end,1:p);
+    CAB = C*Ainv*B;
+    prev_diag_s = zeros(q,1); 
+    prev_diag_z = zeros(q,1); 
+    MsAinv = zeros(2*q,2*q); 
+end
+
+D = M(p+1:end,p+1:end);
+Z = D(q+1:end, 1:q); S = D(q+1:end, q+1:end);
+diag_s = diag(S);
+diag_z = diag(Z);
+U = [zeros(p+q,q); eye(q)]; % figure out dimensions here
+V = [zeros(q,p) diag(diag_z-prev_diag_z) diag(diag_s-prev_diag_s)];
+
+T = V*MsAinv; 
+MsAinv = MsAinv - MsAinv*U*inv(eye(q) + T*U)*T; 
+
+
+if(~isempty(MsDinv_prev))
+    MsDinv = mtx_inv_newton(MsD, 1.e-6, 100, MsDinv_prev);
+else
+    MsDinv = mtx_inv_newton(MsD, 1.e-6, 100, MsD'/(norm(MsD,1)*norm(MsD,inf)));
+end
+
+T = MsDinv*B*Dinv; U = Dinv*C;
+Minv = [MsDinv -T; -U*MsDinv Dinv+U*T];
+MsDinv_prev = MsDinv; 
+
+end
+

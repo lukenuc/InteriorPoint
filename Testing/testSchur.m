@@ -15,7 +15,7 @@ for i = 1:length(w_arr)
     time = [];
     for j = 1:num_trials
         tic
-        inv_H_kkt = schurInverseNewton(H_kkt,N,m);
+        inv_H_kkt = schurWoodbury(H_kkt,N,m);
         % inv_H_kkt = schurInverse(H_kkt,N,m);
         p = -inv_H_kkt*grad_kkt;
         time = [time toc];

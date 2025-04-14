@@ -15,9 +15,9 @@ MsD = A - B*Dinv*C;
 % MsDinv = inv(MsD);
 
 if(~isempty(MsDinv_prev))
-    MsDinv = mtx_inv_newton(MsD, 1.e-9, 100, MsDinv_prev);
+    MsDinv = mtx_inv_newton(MsD, 1.e-6, 100, MsDinv_prev);
 else
-    MsDinv = mtx_inv_newton(MsD, 1.e-9, 100, MsD'/(norm(MsD,1)*norm(MsD,inf)));
+    MsDinv = mtx_inv_newton(MsD, 1.e-6, 100, MsD'/(norm(MsD,1)*norm(MsD,inf)));
 end
 
 T = MsDinv*B*Dinv; U = Dinv*C;

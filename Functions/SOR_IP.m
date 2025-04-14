@@ -23,6 +23,9 @@ for k = 1 : MAXIT
     y = x; % Save previous iteration
 
     for i = 1 : n
+        if i == 141 
+            debug = 1; 
+        end
         if i <= p % Phase 1
             sum1 = 0;
             for j = 1 : i - 1
@@ -40,7 +43,7 @@ for k = 1 : MAXIT
             end
             x(i) = (omega*b(i) - omega*sum1 + (1-omega)*A(i,i)*y(i))/A(i,i); 
         else % Phase 3
-            x(i) = (omega*b(i) - omega*A(i,i-m) + (1-omega)*A(i,i)*y(i))/A(i,i); 
+            x(i) = (omega*b(i) - omega*A(i,i-m)*x(i-m) + (1-omega)*A(i,i)*y(i))/A(i,i); 
         end
     end
 
