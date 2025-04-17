@@ -1,0 +1,25 @@
+
+% Test script for the Schur complement for computing inverses
+
+clear all; clc; close all;
+include
+load('test.mat')
+
+w_arr = 1;
+times = zeros(1, length(w_arr));
+iters = zeros(1, length(w_arr));
+num_trials = 50;
+
+Sigma = mu.*(inv(S))^2;
+H_sym = [H + 2*A_i'*Sigma*A_i -A_i'; -A_i inv(Sigma)];
+r1 = grad_kkt(1:N); 
+time = [];
+for j = 1:num_trials
+    
+
+    tic
+    p = conjugateGradient()
+    time = [time toc];
+end
+time(time == max(time) | time == min(time)) = [];
+times = mean(time)

@@ -70,6 +70,7 @@ time_arr = zeros(num_methods, num_trials);
 [row, col, v] = find(H_kkt);
 coo = sortrows([row col v], 1);
 row = coo(:,1); col = coo(:,2); v = coo(:,3);
+n = length(grad_kkt); 
 
 for j = 1:num_trials
 
@@ -84,10 +85,10 @@ for j = 1:num_trials
 
     % SOR
     tic
-    [p,~,~] = SOR(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), 0.45, 1.e-9, 100);
+    [p,~,~] = SOR(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), 0.45, 1.e-5, 100);
     time_arr(2, j) = toc;
     tic
-    [p,~,~] = SOR_COO(row, col, v, -grad_kkt, zeros(n,1), 0.45, 1.e-9, 100);
+    [p,~,~] = SOR_COO(row, col, v, -grad_kkt, zeros(n,1), 0.45, 1.e-5, 100);
     time_arr_opt(2, j) = toc;
 
     % Schur-Newton
@@ -133,3 +134,5 @@ ylabel('Execution Time (seconds)');
 legend({'Unoptimized', 'Optimized'}, 'Location', 'northeast');
 grid on;
 grid minor;
+
+%% Testing the symmetrized double-augmented IP method

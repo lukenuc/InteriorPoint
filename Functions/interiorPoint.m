@@ -89,9 +89,9 @@ while mu > 0.1
             norm(diag(s)*z - mu.*ones(length(s),1), inf) ...
             norm(c_i(u) + s,inf)]);
 
-        [row, col, val] = find(H_kkt);
-        coo = sortrows([row col val], 1);
-        row = coo(:,1); col = coo(:,2); val = coo(:,3);
+        % [row, col, val] = find(H_kkt);
+        % coo = sortrows([row col val], 1);
+        % row = coo(:,1); col = coo(:,2); val = coo(:,3);
 
         % Improve this
         % p = -H_kkt\grad_kkt;
@@ -101,8 +101,8 @@ while mu > 0.1
         % [U,c,~] = GaussElimPivoting(H_kkt,-grad_kkt); % unoptimized
         % [p,~] = backSubs(U,c);
 
-        % [U,c,~] = GaussElim_IP(H_kkt,-grad_kkt,N,m); % optimized
-        % [p,~] = backSubs_IP(U,c,N,m);
+        [U,c,~] = GaussElim_IP(H_kkt,-grad_kkt,N,m); % optimized
+        [p,~] = backSubs_IP(U,c,N,m);
 
         % inv_H_kkt = schurInverse(H_kkt,N,m);
         % inv_H_kkt = schurInverseNewton(H_kkt,N,m);
@@ -125,7 +125,7 @@ while mu > 0.1
 
         w = 0.54;
         % [p,~,~] = SOR(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-5, 100);
-        [p,~,~] = SOR_IP(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-2, 100, N, m);
+        % [p,~,~] = SOR_IP(H_kkt, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-2, 100, N, m);
         % [p,~,~] = SOR_COO(row, col, val, -grad_kkt, zeros(length(grad_kkt),1), w, 1.e-2, 100);
 
         lu = length(u); ls = length(s); lz = length(z);
